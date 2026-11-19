@@ -19,7 +19,7 @@ export default function Login() {
         body: JSON.stringify({ email, password })
       })
       const json = await res.json()
-      if (!res.ok) throw new Error(json.message || 'Credenciales incorrectas')
+      if (!res.ok) throw new Error(json.error?.message || json.message || 'Credenciales incorrectas')
       localStorage.setItem('accessToken', json.data.accessToken)
       localStorage.setItem('refreshToken', json.data.refreshToken)
       navigate('/')

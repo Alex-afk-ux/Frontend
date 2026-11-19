@@ -20,7 +20,12 @@ export default function Register() {
         body: JSON.stringify({ name, email, password })
       })
       const json = await res.json()
-      if (!res.ok) throw new Error(json.message || 'No se pudo registrar')
+      if (!res.ok) {
+        // El backend devuelve qué campos fallan: los mostramos (p. ej. "Contraseña: ...")
+        const labels = { name: 'Nombre', email: 'Email', password: 'Contraseña' }
+        const details = json.error?.details?.map(d => `${labels[d.field] || d.field}: ${d.message}`)
+        throw new Error(details?.length ? details.join(' · ') : json.error?.message || json.message || 'No se pudo registrar')
+      }
       localStorage.setItem('accessToken', json.data.accessToken)
       localStorage.setItem('refreshToken', json.data.refreshToken)
       navigate('/')
@@ -57,8 +62,9 @@ export default function Register() {
               <div className="mb-4">
                 <label htmlFor="password" className="form-label">Contraseña</label>
                 <input id="password" type="password" className="form-control"
-                  placeholder="••••••••" value={password}
+                  placeholder="Mínimo 12 caracteres" value={password} minLength={12}
                   onChange={e => setPassword(e.target.value)} required />
+                <div className="form-text" style={{ color: 'var(--muted)' }}>Mínimo 12 caracteres.</div>
               </div>
               <button type="submit" className="btn btn-primary w-100" disabled={loading}>
                 {loading ? 'Creando cuenta...' : 'Registrarme'}
